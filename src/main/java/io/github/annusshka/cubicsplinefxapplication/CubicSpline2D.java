@@ -28,9 +28,9 @@ public class CubicSpline2D {
 
     private List<Double> calculateParams(List<Double> x, List<Double> y) {
         List<Double> params = new ArrayList<>();
-        params.add(0.0);
 
         double n = 0.0;
+        params.add(n);
         for (int i = 0; i < x.size() - 1; i++) {
             n = n + Math.hypot(x.get(i + 1) - x.get(i), y.get(i + 1) - y.get(i));
             params.add(n);
