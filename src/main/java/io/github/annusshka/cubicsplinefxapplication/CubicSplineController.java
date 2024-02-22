@@ -22,9 +22,11 @@ public class CubicSplineController {
 
     List<Point2D> points = new ArrayList<Point2D>();
 
-    int index = -1;
+    int pointIndex = -1;
 
-    int clickCount = 0;
+    boolean isPointHandled = false;
+
+    final int POINT_RADIUS = 3;
 
     @FXML
     private void initialize() {
@@ -41,10 +43,7 @@ public class CubicSplineController {
 
     private void splineInterpolation(ArrayList<Double> x, ArrayList<Double> y, int num) {
         CubicSpline2D cubicSpline2D = new CubicSpline2D(x, y);
-        List<Double> params = new ArrayList<>();
-
-        params = cubicSpline2D.getParams(x, y);
-
+        List<Double> params = cubicSpline2D.getParams();
         params = linspace(params.get(0), params.get(params.size() - 1), num);
 
         for (double param : params) {
@@ -65,25 +64,26 @@ public class CubicSplineController {
         return result;
     }
 
-    private void handleSecondaryClick(GraphicsContext graphicsContext, MouseEvent event) {
+    private void handleSecondaryClick(final GraphicsContext graphicsContext, MouseEvent event) {
         final Point2D clickPoint = new Point2D(event.getX(), event.getY());
 
-        if (clickCount == 0) {
+        assert false;
+        if (!isPointHandled) {
             for (int i = 0; i < pointsX.size(); i++) {
-                double x = pointsX.get(i);
-                double y = pointsY.get(i);
-                if (x >= clickPoint.getX() - 3 && x <= clickPoint.getX() + 3 &&
-                        y >= clickPoint.getY() - 3 && y <= clickPoint.getY() + 3) {
-                    clickCount++;
-                    index = i;
+                final double x = pointsX.get(i);
+                final double y = pointsY.get(i);
+                if (x >= clickPoint.getX() - POINT_RADIUS && x <= clickPoint.getX() + POINT_RADIUS &&
+                        y >= clickPoint.getY() - POINT_RADIUS && y <= clickPoint.getY() + POINT_RADIUS) {
+                    isPointHandled = true;
+                    pointIndex = i;
                 }
             }
-        } else if (clickCount == 1 && index >= 0) {
-            pointsX.set(index, clickPoint.getX());
-            pointsY.set(index, clickPoint.getY());
+        } else if (pointIndex >= 0 && pointIndex < pointsX.size()) {
+            pointsX.set(pointIndex, clickPoint.getX());
+            pointsY.set(pointIndex, clickPoint.getY());
             drawSpline(graphicsContext);
-            clickCount = 0;
-            index = -1;
+            isPointHandled = false;
+            pointIndex = -1;
         }
     }
 
@@ -98,8 +98,6 @@ public class CubicSplineController {
 
     private void drawSpline(GraphicsContext graphicsContext) {
         graphicsContext.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
-
-        final int POINT_RADIUS = 3;
 
         for (int i = 0; i < pointsX.size(); i++) {
             graphicsContext.fillOval(pointsX.get(i) - POINT_RADIUS, pointsY.get(i) - POINT_RADIUS,
